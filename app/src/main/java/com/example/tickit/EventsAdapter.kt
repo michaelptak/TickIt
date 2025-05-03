@@ -12,6 +12,9 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<EventsAdapter.EventViewHolder>() {
 
@@ -24,6 +27,17 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
         val textVenueAddress = itemView.findViewById<TextView>(R.id.textVenueAddress)
         val textPriceRange = itemView.findViewById<TextView>(R.id.textPriceRange)
         val buttonTicketLink = itemView.findViewById<Button>(R.id.buttonTicketLink)
+
+        init {
+            buttonTicketLink.setOnClickListener {
+                // adapterPosition gives current bound item
+                val event = events[adapterPosition]
+                event.url?.let { link ->
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    itemView.context.startActivity(intent)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
@@ -51,25 +65,29 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
         // Event start date and time
         val date = event.dates?.start?.localDate
         val time = event.dates?.start?.localTime
-        // Attempt at formatting the date/time, but creates bugs
-//        val formattedDate = LocalDate.parse(date).format(DateTimeFormatter.ofPattern("M/d/yyyy"))
-//        val formattedTime = LocalTime.parse(time).format(DateTimeFormatter.ofPattern("h:mm a"))
-//        holder.textEventDateTime.text = "$formattedDate @ $formattedTime"
-        holder.textEventDateTime.text = "$date @ $time"
+
+        if (!date.isNullOrEmpty()) {
+            try {
+                val formattedDate = LocalDate.parse(date).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+                val formattedTime = if (!time.isNullOrEmpty()) {
+                    LocalTime.parse(time).format(DateTimeFormatter.ofPattern("h:mm a"))
+                } else {
+                    "TBD"
+                }
+                holder.textEventDateTime.text = "$formattedDate @ $formattedTime"
+            } catch (e: Exception) {
+                // Fallback in case of parsing error
+                holder.textEventDateTime.text = "Date/Time Unavailable"
+            }
+        } else {
+            holder.textEventDateTime.text = "Date/Time TBD"
+        }
 
         // Venue inf
         val venue = event.embedded.venues.first()
         holder.textVenueName.text = venue.name
         holder.textVenueCityState.text = "${venue.city.name}, ${venue.state.name}"
         holder.textVenueAddress.text = venue.address.line1
-
-        // Buy tickets button
-        holder.buttonTicketLink.setOnClickListener {
-            event.url?.let { link ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                holder.itemView.context.startActivity(intent)
-            }
-        }
 
         // Price range
         val pr = event.priceRanges?.firstOrNull()

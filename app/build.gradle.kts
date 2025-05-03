@@ -45,7 +45,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    
+    // Location services
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

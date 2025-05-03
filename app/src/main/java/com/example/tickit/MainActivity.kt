@@ -1,38 +1,50 @@
 package com.example.tickit
 
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import android.Manifest
+import android.annotation.SuppressLint
+import com.google.android.gms.location.FusedLocationProviderClient
+import android.location.Geocoder
+import android.location.LocationManager
+import android.content.Context
 
-private const val TAG = "MainActivity"
+
+//private const val TAG = "MainActivity"
 val tmApiKey = ""
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var viewModel: EventsViewModel
+    private val ACCESS_LOCATION_CODE = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(this)[EventsViewModel::class.java]
 
+        // Initialize SharedPreferences and Views
         val sharedPreferences = getSharedPreferences("TicketMasterPrefs", MODE_PRIVATE)
-
         val searchEditText = findViewById<EditText>(R.id.searchEditText)
         val searchButton = findViewById<Button>(R.id.searchButton)
         val noResultsTextView = findViewById<TextView>(R.id.noResultsTextView).apply { visibility = View.GONE }
+        val locationButton = findViewById<Button>(R.id.locationButton)
 
         val categories = listOf(
             "Choose an event category",
@@ -46,6 +58,10 @@ class MainActivity : AppCompatActivity() {
             "Dance"
         )
 
+        locationButton.setOnClickListener {
+            getLocationPermission()
+        }
+
         // RecyclerView
         val recyclerView= findViewById<RecyclerView>(R.id.recyclerView)
         val eventList = ArrayList<Event>()
@@ -53,13 +69,21 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        //Retrofit
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://app.ticketmaster.com/discovery/v2/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        // Observe LiveData from ViewModel
+        viewModel.events.observe(this) { list ->
+            eventList.clear()
+            eventList.addAll(list)
+            adapter.notifyDataSetChanged()
 
-        val ticketMasterAPI = retrofit.create(TicketMasterService::class.java)
+            // show/hide “no results”
+            if (list.isEmpty()) {
+                recyclerView.visibility = View.GONE
+                noResultsTextView.visibility = View.VISIBLE
+            } else {
+                noResultsTextView.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }
+        }
 
         //handle spinner
         val categoryAdapter = ArrayAdapter<String>(
@@ -84,20 +108,20 @@ class MainActivity : AppCompatActivity() {
         searchButton.setOnClickListener {
             val selectedCategory = spinner.selectedItem.toString()
             if (selectedCategory == categories[0]) {
-                AlertDialog.Builder(this)
-                    .setTitle("Select a category")
-                    .setMessage("Event category cannot be empty. Please select an event category.")
-                    .setPositiveButton("OK", null)
-                    .show()
+                showAlertDialog(
+                    "Select a category",
+                    "Event category cannot be empty. Please select an event category."
+                )
+                return@setOnClickListener
             }
 
             val city = searchEditText.text.toString()
-            if (city.isEmpty() || selectedCategory == "Choose an event category") {
-                AlertDialog.Builder(this)
-                    .setTitle("Location Missing")
-                    .setMessage("City cannot be empty. Please enter a city.")
-                    .setPositiveButton("OK", null)
-                    .show()
+            if (city.isEmpty()) {
+                showAlertDialog(
+                    "Location Missing",
+                    "City cannot be empty. Please enter a city."
+                )
+                return@setOnClickListener
             }
 
             // Save the last search to SharedPreferences
@@ -107,36 +131,81 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
 
             // API Call
-            ticketMasterAPI.searchEvents(tmApiKey, selectedCategory, city).enqueue(object : Callback<EventData> {
-                override fun onResponse(call: Call<EventData>, response: Response<EventData>) {
-                    // logging purposes
-                    Log.d(TAG, "onResponse: $response")
-                    val body = response.body()
-                    if (body == null) {
-                        Log.w(TAG, "Valid response was not received")
-                        return
-                    }
-                    //populate recyclerview
-                    eventList.clear()
-                    val events = body.embedded?.events.orEmpty()
-                    if (events.isEmpty()) {
-                        recyclerView.visibility = View.GONE
-                        noResultsTextView.visibility = View.VISIBLE
-                    } else {
-                        noResultsTextView.visibility = View.GONE
-                        recyclerView.visibility = View.VISIBLE
-                        eventList.addAll(events)
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-
-                override fun onFailure(call: Call<EventData>, t: Throwable) {
-                    Log.d(TAG, "onFailure : $t")
-                }
-            })
-
-
+            viewModel.searchEvents(tmApiKey, selectedCategory, city)
         }
+    }
 
+    // Helper function for Dialogs
+    private fun showAlertDialog(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    // Helper function for getting location permission
+    private fun getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            onLocationPermissionGranted()
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // to-do: show rationale dialog here, then re-request
+            }
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                ACCESS_LOCATION_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == ACCESS_LOCATION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onLocationPermissionGranted()
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun onLocationPermissionGranted() {
+        Toast.makeText(this, "Location permission granted!", Toast.LENGTH_SHORT).show()
+
+        // Get the last known location (network first)
+        val locationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val location =
+            locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+        if (location != null) {
+            // 2) Reverse‐geocode to a city name
+            val geocoder = Geocoder(this)
+            val addresses = geocoder.getFromLocation(
+                location.latitude,
+                location.longitude,
+                1
+            )
+            if (!addresses.isNullOrEmpty()) {
+                val city = addresses[0].locality ?: ""
+                // Populate the search field
+                findViewById<EditText>(R.id.searchEditText)
+                    .setText(city)
+            }
+        } else {
+            Toast.makeText(
+                this,
+                "Unable to fetch current location",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }
