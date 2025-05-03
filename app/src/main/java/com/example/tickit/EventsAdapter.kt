@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<EventsAdapter.EventViewHolder>() {
 
     inner class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageEvent = itemView.findViewById<ImageView>(R.id.imageEvent)
+        val imageEvent: ImageView = itemView.findViewById<ImageView>(R.id.imageEvent)
         val textEventName = itemView.findViewById<TextView>(R.id.textEventName)
         val textEventDateTime = itemView.findViewById<TextView>(R.id.textEventDateTime)
         val textVenueName = itemView.findViewById<TextView>(R.id.textVenueName)

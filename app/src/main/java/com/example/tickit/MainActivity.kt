@@ -18,18 +18,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.Manifest
 import android.annotation.SuppressLint
-import com.google.android.gms.location.FusedLocationProviderClient
 import android.location.Geocoder
 import android.location.LocationManager
 import android.content.Context
 
 
 //private const val TAG = "MainActivity"
-val tmApiKey = ""
+const val tmApiKey = ""
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var viewModel: EventsViewModel
+    private lateinit var viewModel: EventsViewModel
     private val ACCESS_LOCATION_CODE = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //handle spinner
-        val categoryAdapter = ArrayAdapter<String>(
+        val categoryAdapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_dropdown_item, categories)
         val spinner: Spinner = findViewById(R.id.spinner)
         spinner.adapter = categoryAdapter
@@ -152,7 +151,20 @@ class MainActivity : AppCompatActivity() {
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // to-do: show rationale dialog here, then re-request
+                // show the user rationale and re-prompt
+                AlertDialog.Builder(this)
+                    .setTitle("Location Permission Needed")
+                    .setMessage("This app needs access to your location to auto-fill your city for event searches.")
+                    .setPositiveButton("OK") { _, _ ->
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            ACCESS_LOCATION_CODE
+                        )
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+                return
             }
 
             ActivityCompat.requestPermissions(

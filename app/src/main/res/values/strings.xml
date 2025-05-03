@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TickIt</string>
+    <string name="search">Search</string>
+    <string name="no_results_currently_available">No Results Currently Available</string>
+    <string name="find_tickets_near_you">Find Tickets Near You</string>
+    <string name="use_my_location">Use My Location</string>
+    <string name="buy_tickets">Buy Tickets</string>
 </resources>
