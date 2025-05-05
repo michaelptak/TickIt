@@ -27,6 +27,7 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
         val textVenueAddress = itemView.findViewById<TextView>(R.id.textVenueAddress)
         val textPriceRange = itemView.findViewById<TextView>(R.id.textPriceRange)
         val buttonTicketLink = itemView.findViewById<Button>(R.id.buttonTicketLink)
+        val openMapButton = itemView.findViewById<Button>(R.id.openMapButton)
 
         init {
             buttonTicketLink.setOnClickListener {
@@ -36,6 +37,20 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
                     itemView.context.startActivity(intent)
                 }
+            }
+
+            openMapButton.setOnClickListener {
+                val venue = events[adapterPosition].embedded.venues.first()
+                val lat = venue.location.latitude.toDouble()
+                val lng = venue.location.longitude.toDouble()
+
+                val ctx = itemView.context
+                val intent = Intent(ctx, MapsActivity::class.java).apply {
+                    putExtra("EXTRA_LAT", lat)
+                    putExtra("EXTRA_LNG", lng)
+                    putExtra("EXTRA_VENUE_NAME", venue.name)
+                }
+                ctx.startActivity(intent)
             }
         }
     }

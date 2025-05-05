@@ -5,4 +5,5 @@
     <string name="find_tickets_near_you">Find Tickets Near You</string>
     <string name="use_my_location">Use My Location</string>
     <string name="buy_tickets">Buy Tickets</string>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>

@@ -45,7 +45,14 @@ data class Venue(
     val name: String,
     val city: City,
     val state: State,
-    val address: Address
+    val address: Address,
+    @SerializedName("location")
+    val location: Location
+)
+
+data class Location(
+    val latitude: String,
+    val longitude: String
 )
 
 data class City(
