@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/eventsListFragment"
+        android:icon="@drawable/ic_event"
+        android:title="@string/title_events" />
+
+    <item
+        android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_favorite"
+        android:title="@string/title_favorites" />
+
+    <item
+        android:id="@+id/mapsFragment"
+        android:icon="@drawable/ic_map"
+        android:title="@string/title_map" />
+
+</menu>

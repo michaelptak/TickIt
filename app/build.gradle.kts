@@ -51,7 +51,10 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     // Location services
     implementation("com.google.android.gms:play-services-location:21.0.1")
-
+    // Bottom navigation view
+    implementation("com.google.android.material:material:1.8.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
+    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

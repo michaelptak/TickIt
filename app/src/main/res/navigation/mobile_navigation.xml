@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/eventsListFragment">
+
+    <fragment
+        android:id="@+id/eventsListFragment"
+        android:name="com.example.tickit.EventsListFragment"
+        android:label="Events" />
+
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.tickit.FavoritesFragment"
+        android:label="Favorites" />
+
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.tickit.MapsFragment"
+        android:label="@string/title_map" />
+
+</navigation>

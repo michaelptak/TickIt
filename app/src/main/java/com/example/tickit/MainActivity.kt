@@ -2,26 +2,24 @@ package com.example.tickit
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.Manifest
 import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.location.LocationManager
 import android.content.Context
-
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 //private const val TAG = "MainActivity"
 const val tmApiKey = ""
@@ -35,6 +33,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Bottom Navigation
+        val navHost = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHost.navController
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        NavigationUI.setupWithNavController(bottomNav, navController)
+
         // Initialize ViewModel
         viewModel = ViewModelProvider(this)[EventsViewModel::class.java]
 
@@ -42,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("TicketMasterPrefs", MODE_PRIVATE)
         val searchEditText = findViewById<EditText>(R.id.searchEditText)
         val searchButton = findViewById<Button>(R.id.searchButton)
-        val noResultsTextView = findViewById<TextView>(R.id.noResultsTextView).apply { visibility = View.GONE }
         val locationButton = findViewById<Button>(R.id.locationButton)
 
         val categories = listOf(
@@ -59,29 +63,6 @@ class MainActivity : AppCompatActivity() {
 
         locationButton.setOnClickListener {
             getLocationPermission()
-        }
-
-        // RecyclerView
-        val recyclerView= findViewById<RecyclerView>(R.id.recyclerView)
-        val eventList = ArrayList<Event>()
-        val adapter = EventsAdapter(eventList)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Observe LiveData from ViewModel
-        viewModel.events.observe(this) { list ->
-            eventList.clear()
-            eventList.addAll(list)
-            adapter.notifyDataSetChanged()
-
-            // show/hide “no results”
-            if (list.isEmpty()) {
-                recyclerView.visibility = View.GONE
-                noResultsTextView.visibility = View.VISIBLE
-            } else {
-                noResultsTextView.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
-            }
         }
 
         //handle spinner

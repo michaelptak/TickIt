@@ -10,6 +10,11 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavOptions
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import java.time.LocalDate
@@ -43,14 +48,31 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
                 val venue = events[adapterPosition].embedded.venues.first()
                 val lat = venue.location.latitude.toDouble()
                 val lng = venue.location.longitude.toDouble()
+                val name = venue.name
 
-                val ctx = itemView.context
-                val intent = Intent(ctx, MapsActivity::class.java).apply {
-                    putExtra("EXTRA_LAT", lat)
-                    putExtra("EXTRA_LNG", lng)
-                    putExtra("EXTRA_VENUE_NAME", venue.name)
-                }
-                ctx.startActivity(intent)
+                //Save into shared view model
+                val vm = ViewModelProvider(itemView.context as FragmentActivity)
+                    .get(EventsViewModel::class.java)
+                vm.selectedLat = lat
+                vm.selectedLng = lng
+                vm.selectedVenueName = name
+
+                // build a small Bundle of args to pass the venue coordinates
+                val args = bundleOf(
+                    "EXTRA_LAT" to lat,
+                    "EXTRA_LNG" to lng,
+                    "EXTRA_VENUE_NAME" to name
+                )
+
+                // use NavController to go to the MapsFragment
+                // Used to fix back-stack issues
+                val navOptions = NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setPopUpTo(R.id.mobile_navigation, false)
+                    .build()
+
+                itemView.findNavController()
+                    .navigate(R.id.mapsFragment, args, navOptions)
             }
         }
     }

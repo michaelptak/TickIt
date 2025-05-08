@@ -10,11 +10,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class EventsViewModel: ViewModel() {
-    // 1. Livedata to hold the list of events
+    // Livedata to hold the list of events
     private val _events = MutableLiveData<List<Event>>()
     val events: LiveData<List<Event>> = _events
 
-    //2. Build retrofit instance inside the ViewModel
+    // Remember last-clicked venue
+    var selectedLat: Double? = null
+    var selectedLng: Double? = null
+    var selectedVenueName: String? = null
+
+    // Build retrofit instance inside the ViewModel
     private val ticketMasterAPI = Retrofit.Builder()
         .baseUrl("https://app.ticketmaster.com/discovery/v2/")
         .addConverterFactory(GsonConverterFactory.create())
