@@ -21,7 +21,7 @@ import android.view.*
 import android.widget.*
 
 // Include Ticketmaster API key here
-const val tmApiKey = "dAJZsZGUAmNjkma5WPyGWu9wKbkTMw6Q"
+const val tmApiKey = ""
 
 // Hosts the BottomNavigationView, search controls (city/category), and location permission logic.
 //Coordinates between UI (fragments) and EventsViewModel for searches, favorites, and maps.
