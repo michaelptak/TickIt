@@ -6,33 +6,23 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:strokeColor="?attr/colorOutline"
+        app:strokeWidth="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp">
-
-            <!-- Event Image -->
-
-            <Button
-                android:id="@+id/openMapButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="236dp"
-                android:layout_marginTop="8dp"
-                android:text="Find Venue"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textPriceRange" />
 
             <ImageView
                 android:id="@+id/imageEvent"
@@ -51,9 +41,9 @@
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:textColor="@android:color/black"
-                app:layout_constraintTop_toBottomOf="@id/imageEvent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imageEvent"
                 tools:text="Sample Event Name" />
 
             <TextView
@@ -62,9 +52,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                app:layout_constraintTop_toBottomOf="@id/textEventName"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textEventName"
                 tools:text="Date and Time" />
 
             <TextView
@@ -73,9 +63,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceSubtitle1"
-                app:layout_constraintTop_toBottomOf="@id/textEventDateTime"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textEventDateTime"
                 tools:text="Venue Name" />
 
             <TextView
@@ -84,9 +74,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                app:layout_constraintTop_toBottomOf="@id/textVenueName"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textVenueName"
                 tools:text="City, State" />
 
             <TextView
@@ -95,9 +85,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                app:layout_constraintTop_toBottomOf="@id/textVenueCityState"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textVenueCityState"
                 tools:text="123 Main St" />
 
             <TextView
@@ -106,20 +96,61 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                app:layout_constraintTop_toBottomOf="@id/textVenueAddress"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textVenueAddress"
                 tools:text="$20 - $50" />
 
-            <Button
-                android:id="@+id/buttonTicketLink"
-                android:layout_width="wrap_content"
+            <!-- BUTTON ROW -->
+            <LinearLayout
+                android:id="@+id/buttonContainer"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="8dp"
-                android:text="@string/buy_tickets"
                 app:layout_constraintTop_toBottomOf="@id/textPriceRange"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonTicketLink"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/buy_tickets"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/favoriteButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checkable="true"
+                    android:text="Favorite"
+                    app:cornerRadius="12dp"
+
+                    app:backgroundTint="@color/favorite_button_bg"
+                    android:textColor="@color/favorite_button_text"
+
+                    app:strokeColor="@color/favorite_button_text"
+                    app:strokeWidth="1dp"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openMapButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Find Venue"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    />
+
+
+            </LinearLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

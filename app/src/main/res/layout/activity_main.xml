@@ -7,16 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/locationButton"
-        android:layout_width="123dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="56dp"
-        android:text="@string/use_my_location"
-        app:layout_constraintStart_toEndOf="@+id/searchEditText"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -31,7 +21,7 @@
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="405dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,40 +29,85 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    <EditText
-        android:id="@+id/searchEditText"
-        android:layout_width="250dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        android:autofillHints="Enter your city."
-        android:ems="10"
-        android:hint="Enter a location"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
-
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="124dp"
-        android:layout_height="49dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/search"
-        app:layout_constraintStart_toEndOf="@+id/searchEditText"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+        android:hint="@string/enter_city"
+        app:boxBackgroundMode="outline"
+        app:layout_constraintBottom_toTopOf="@+id/nav_host_fragment"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner"
+        app:layout_constraintVertical_bias="0.5">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchEditText"
+            android:layout_width="229dp"
+            android:layout_height="44dp"
+            android:imeOptions="actionSearch"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/searchButtonsContainer"
+        android:layout_width="156dp"
+        android:layout_height="109dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/nav_host_fragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/searchInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/spinner">
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/searchButton"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="4dp"
+            android:text="@string/search"
+            android:textAllCaps="false"
+            app:cornerRadius="12dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorOnPrimary"
+            app:icon="@drawable/ic_magnify"
+            />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/locationButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="4dp"
+            android:text="@string/use_my_location"
+            android:textAllCaps="false"
+            app:cornerRadius="12dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            app:icon="@drawable/ic_my_location"
+            />
+
+    </LinearLayout>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:navGraph="@navigation/mobile_navigation"
         app:defaultNavHost="true"
-        app:layout_constraintTop_toBottomOf="@+id/locationButton"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/searchButtonsContainer"
+        app:navGraph="@navigation/mobile_navigation" />
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -80,9 +115,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="0dp"
-        app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:menu="@menu/bottom_nav_menu"
+        android:background="?attr/colorSurface"
+        app:labelVisibilityMode="labeled"
+        app:itemHorizontalTranslationEnabled="false"
+        app:itemIconSize="28dp"
+        />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

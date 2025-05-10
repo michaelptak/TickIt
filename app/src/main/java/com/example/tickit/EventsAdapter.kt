@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
@@ -17,11 +18,16 @@ import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.*
 
 class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<EventsAdapter.EventViewHolder>() {
+
+    private val favoritedUrls = mutableSetOf<String>()
 
     inner class EventViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageEvent: ImageView = itemView.findViewById<ImageView>(R.id.imageEvent)
@@ -33,6 +39,7 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
         val textPriceRange = itemView.findViewById<TextView>(R.id.textPriceRange)
         val buttonTicketLink = itemView.findViewById<Button>(R.id.buttonTicketLink)
         val openMapButton = itemView.findViewById<Button>(R.id.openMapButton)
+        val favoriteButton = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.favoriteButton)
 
         init {
             buttonTicketLink.setOnClickListener {
@@ -42,6 +49,52 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
                     itemView.context.startActivity(intent)
                 }
+            }
+
+            // Favorite button
+            favoriteButton.setOnClickListener {
+                val event = events[adapterPosition]
+                val url = event.url ?: return@setOnClickListener
+
+                val context = itemView.context
+                val db = AppDatabase.getDatabase(context)
+                val dao = db.favoriteDao()
+
+                val isNowFavorite: Boolean
+
+                if (favoritedUrls.contains(url)) {
+                    // Unfavorite
+                    isNowFavorite = false
+                    favoritedUrls.remove(url)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        dao.deleteByUrl(url)
+                    }
+                } else {
+                    // Favorite
+                    isNowFavorite = true
+                    favoritedUrls.add(url)
+
+                    val json = Gson().toJson(event)
+                    val favorite = FavoriteEvent(url, json)
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        dao.insert(favorite)
+                    }
+                }
+
+                // Update UI
+                favoriteButton.isSelected = isNowFavorite
+                favoriteButton.text = if (isNowFavorite) "Favorited" else "Favorite"
+
+                val message = if (favoritedUrls.contains(url)) {
+                    "Added to favorites"
+                } else {
+                    "Removed from favorites"
+                }
+
+                Snackbar.make(itemView, message, Snackbar.LENGTH_SHORT)
+                    .setAnchorView(itemView.rootView.findViewById(R.id.bottom_nav))
+                    .show()
             }
 
             openMapButton.setOnClickListener {
@@ -85,6 +138,11 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
+
+        // Favorites
+        holder.favoriteButton.isChecked = favoritedUrls.contains(event.url)
+        holder.favoriteButton.text =
+            if (holder.favoriteButton.isChecked) "Favorited" else "Favorite"
 
         // Event Name
         holder.textEventName.text = event.name ?: "No Title"
@@ -138,5 +196,12 @@ class EventsAdapter(private val events: List<Event>) : RecyclerView.Adapter<Even
 
     override fun getItemCount(): Int {
         return events.size
+    }
+
+    // Refreshes which URLs are currently favorite
+    fun setFavoritedUrls(urls: Set<String>) {
+        favoritedUrls.clear()
+        favoritedUrls.addAll(urls)
+        notifyDataSetChanged()  // re-bind all to update button states
     }
 }

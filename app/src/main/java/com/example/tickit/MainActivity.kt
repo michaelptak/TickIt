@@ -6,7 +6,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,12 +16,15 @@ import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.location.LocationManager
 import android.content.Context
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 
 //private const val TAG = "MainActivity"
-const val tmApiKey = ""
+const val tmApiKey = "dAJZsZGUAmNjkma5WPyGWu9wKbkTMw6Q"
 
 class MainActivity : AppCompatActivity() {
 
@@ -112,6 +114,13 @@ class MainActivity : AppCompatActivity() {
 
             // API Call
             viewModel.searchEvents(tmApiKey, selectedCategory, city)
+
+            // Navigate back to events fragment even when pressed from a different one
+            bottomNav.selectedItemId = R.id.eventsListFragment
+
+            // Hide the keyboard after the search
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(searchEditText.windowToken, 0)
         }
     }
 
@@ -156,49 +165,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == ACCESS_LOCATION_CODE) {
+            val rootView = findViewById<View>(android.R.id.content)
+
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 onLocationPermissionGranted()
             } else {
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+                Snackbar.make(rootView, "Location permission denied", Snackbar.LENGTH_LONG)
+                    .setAnchorView(R.id.bottom_nav)
+                    .setBackgroundTint(
+                        ContextCompat.getColor(this, R.color.brand_secondary)
+                    )
+                    .setTextColor(
+                        ContextCompat.getColor(this, R.color.brand_onSecondary)
+                    )
+                    .setAction("Retry") {
+                        getLocationPermission()
+                    }
+                    .show()
             }
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun onLocationPermissionGranted() {
-        Toast.makeText(this, "Location permission granted!", Toast.LENGTH_SHORT).show()
+        val rootView = findViewById<View>(android.R.id.content)
 
         // Get the last known location (network first)
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val location =
-            locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
         if (location != null) {
-            // 2) Reverse‐geocode to a city name
+            // Reverse‐geocode to a city name
             val geocoder = Geocoder(this)
-            val addresses = geocoder.getFromLocation(
-                location.latitude,
-                location.longitude,
-                1
-            )
+            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (!addresses.isNullOrEmpty()) {
                 val city = addresses[0].locality ?: ""
                 // Populate the search field
-                findViewById<EditText>(R.id.searchEditText)
-                    .setText(city)
+                findViewById<EditText>(R.id.searchEditText).setText(city)
+                Snackbar.make(rootView, "Auto‐filled city: $city", Snackbar.LENGTH_LONG)
+                    .setAnchorView(R.id.bottom_nav)
+                    .setAction("OK") { /* no option, just dismiss */ }
+                    .show()
             }
         } else {
-            Toast.makeText(
-                this,
-                "Unable to fetch current location",
-                Toast.LENGTH_SHORT
-            ).show()
+            Snackbar.make(rootView, "Unable to fetch location", Snackbar.LENGTH_LONG)
+                .setAnchorView(R.id.bottom_nav)
+                .setAction("Retry") { getLocationPermission() }
+                .show()
         }
     }
 }

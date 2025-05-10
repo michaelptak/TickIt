@@ -36,6 +36,12 @@ class EventsListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
+        // Favorites view model
+        viewModel.favorites.observe(viewLifecycleOwner) { favEvents ->
+            val favUrls = favEvents.map { it.url }.toSet()
+            adapter.setFavoritedUrls(favUrls)
+        }
+
         val noResultsTextView = view.findViewById<TextView>(R.id.noResultsTextView)
 
         viewModel.events.observe(viewLifecycleOwner) { list ->

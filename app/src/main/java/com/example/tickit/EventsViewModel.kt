@@ -1,5 +1,7 @@
 package com.example.tickit
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,7 +11,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class EventsViewModel: ViewModel() {
+class EventsViewModel(application: Application) : AndroidViewModel(application) {
     // Livedata to hold the list of events
     private val _events = MutableLiveData<List<Event>>()
     val events: LiveData<List<Event>> = _events
@@ -38,4 +40,8 @@ class EventsViewModel: ViewModel() {
                 }
             })
     }
+
+    private val dao = AppDatabase.getDatabase(application).favoriteDao()
+    val favorites: LiveData<List<FavoriteEvent>> = dao.getAllFavorites()
+
 }

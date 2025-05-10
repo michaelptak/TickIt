@@ -1,0 +1,6 @@
+<resources>
+    <color name="brand_primary">#015C91</color>
+    <color name="brand_onPrimary">#E0E0E0</color>
+    <color name="brand_secondary">#1A9CAF</color>
+    <color name="brand_onSecondary">#E0E0E0</color>
+</resources>
