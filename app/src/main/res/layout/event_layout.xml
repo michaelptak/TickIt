@@ -28,6 +28,7 @@
                 android:id="@+id/imageEvent"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
+                android:contentDescription="@string/event_image_content_description"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -127,7 +128,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:checkable="true"
-                    android:text="Favorite"
+                    android:text="@string/favorite"
                     app:cornerRadius="12dp"
 
                     app:backgroundTint="@color/favorite_button_bg"
@@ -142,7 +143,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Find Venue"
+                    android:text="@string/find_venue"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     />
 

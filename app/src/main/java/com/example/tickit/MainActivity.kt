@@ -2,10 +2,6 @@ package com.example.tickit
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -16,26 +12,32 @@ import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.location.LocationManager
 import android.content.Context
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import android.view.inputmethod.InputMethodManager
+import android.view.*
+import android.widget.*
 
-//private const val TAG = "MainActivity"
+// Include Ticketmaster API key here
 const val tmApiKey = "dAJZsZGUAmNjkma5WPyGWu9wKbkTMw6Q"
 
+// Hosts the BottomNavigationView, search controls (city/category), and location permission logic.
+//Coordinates between UI (fragments) and EventsViewModel for searches, favorites, and maps.
 class MainActivity : AppCompatActivity() {
 
+    // ViewModel shared across fragments for search results, favorites, and selected venue
     private lateinit var viewModel: EventsViewModel
+
+    // Arbitrary request code for location permission
     private val ACCESS_LOCATION_CODE = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Bottom Navigation
+        // Bottom Navigation Setup
         val navHost = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHost.navController
@@ -50,35 +52,24 @@ class MainActivity : AppCompatActivity() {
         val searchEditText = findViewById<EditText>(R.id.searchEditText)
         val searchButton = findViewById<Button>(R.id.searchButton)
         val locationButton = findViewById<Button>(R.id.locationButton)
+        val spinner: Spinner = findViewById(R.id.spinner)
 
+        // Category spinner setup
         val categories = listOf(
             "Choose an event category",
-            "Music",
-            "Sports",
-            "Theater",
-            "Family",
-            "Arts & Theater",
-            "Concerts",
-            "Comedy",
-            "Dance"
+            "Music", "Sports", "Theater", "Family",
+            "Arts & Theater", "Concerts", "Comedy", "Dance"
         )
-
-        locationButton.setOnClickListener {
-            getLocationPermission()
-        }
-
-        //handle spinner
-        val categoryAdapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_dropdown_item, categories)
-        val spinner: Spinner = findViewById(R.id.spinner)
-        spinner.adapter = categoryAdapter
+        spinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            categories
+        )
 
         // Load last search using SharedPreferences
         val lastCity = sharedPreferences.getString("last_city", "")
         val lastCategory = sharedPreferences.getString("last_category", "")
-
         searchEditText.setText(lastCity)
-
         if (!lastCategory.isNullOrEmpty()) {
             val position = categories.indexOf(lastCategory)
             if (position >= 0) {
@@ -86,8 +77,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Handle search button
+        // Location Button
+        locationButton.setOnClickListener {
+            getLocationPermission()
+        }
+
+        // Search Button
         searchButton.setOnClickListener {
+            // Validate category selection
             val selectedCategory = spinner.selectedItem.toString()
             if (selectedCategory == categories[0]) {
                 showAlertDialog(
@@ -97,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Validate city input
             val city = searchEditText.text.toString()
             if (city.isEmpty()) {
                 showAlertDialog(
@@ -107,10 +105,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Save the last search to SharedPreferences
-            val editor = sharedPreferences.edit()
-            editor.putString("last_city", city)
-            editor.putString("last_category", selectedCategory)
-            editor.apply()
+            sharedPreferences.edit().apply {
+                putString("last_city", city)
+                putString("last_category", selectedCategory)
+                apply()
+            }
 
             // API Call
             viewModel.searchEvents(tmApiKey, selectedCategory, city)
@@ -119,8 +118,8 @@ class MainActivity : AppCompatActivity() {
             bottomNav.selectedItemId = R.id.eventsListFragment
 
             // Hide the keyboard after the search
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(searchEditText.windowToken, 0)
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(searchEditText.windowToken, 0)
         }
     }
 
@@ -165,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Handle the permission result
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -190,11 +190,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // When permission is granted
     @SuppressLint("MissingPermission")
     private fun onLocationPermissionGranted() {
         val rootView = findViewById<View>(android.R.id.content)
-
-        // Get the last known location (network first)
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
@@ -208,7 +207,7 @@ class MainActivity : AppCompatActivity() {
                 findViewById<EditText>(R.id.searchEditText).setText(city)
                 Snackbar.make(rootView, "Auto‐filled city: $city", Snackbar.LENGTH_LONG)
                     .setAnchorView(R.id.bottom_nav)
-                    .setAction("OK") { /* no option, just dismiss */ }
+                    .setAction("OK", null)
                     .show()
             }
         } else {

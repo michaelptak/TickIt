@@ -15,8 +15,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
+// Displays a Google Map centered on the event venue.
+// Reads coordinates/title from fragment arguments or falls back to the shared EventsViewModel
 class MapsFragment : Fragment(), OnMapReadyCallback {
-
     private lateinit var mMap: GoogleMap
 
     override fun onCreateView(
@@ -35,21 +36,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // 1) Read the arguments *or* the ViewModel
-        val vm = ViewModelProvider(requireActivity())
-            .get(EventsViewModel::class.java)
-
-        val lat = arguments?.getDouble("EXTRA_LAT")
-            ?: vm.selectedLat
-            ?: -34.0
-        val lng = arguments?.getDouble("EXTRA_LNG")
-            ?: vm.selectedLng
-            ?: 151.0
+        //  Retrieve coordinates and title from args or fall back to ViewModel defaults (or, arbitrarily to default of Sydney in case nothing has been passed yet)
+        val vm = ViewModelProvider(requireActivity())[EventsViewModel::class.java]
+        val lat = arguments?.getDouble("EXTRA_LAT") ?: vm.selectedLat ?: -34.0
+        val lng = arguments?.getDouble("EXTRA_LNG") ?: vm.selectedLng ?: 151.0
         val title = arguments?.getString("EXTRA_VENUE_NAME")
             ?: vm.selectedVenueName
             ?: "Venue"
 
-        // 2) Drop the marker exactly once
+        // Add a single marker and move the camera
         val pos = LatLng(lat, lng)
         val marker = mMap.addMarker(
             MarkerOptions().position(pos).title(title)

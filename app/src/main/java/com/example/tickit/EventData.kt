@@ -2,6 +2,8 @@ package com.example.tickit
 
 import com.google.gson.annotations.SerializedName
 
+// Defines the Kotlin data models that mirror the Ticketmaster API JSON structure
+
 data class EventData(
     @SerializedName("_embedded")
     val embedded: Embedded?
@@ -65,7 +67,7 @@ data class State(
 
 data class Address(
     @SerializedName("line1")
-    val line1: String       // street address
+    val line1: String       // The street address
 )
 
 data class PriceRange(

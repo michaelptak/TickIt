@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="No Results Currently Available"
+        android:text="@string/no_results_currently_available"
         android:visibility="gone" />
 
 </FrameLayout>

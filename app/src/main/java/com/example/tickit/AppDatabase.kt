@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+// Room database (favorites_db) for persisting favorite events across sessions
+
 @Database(entities = [FavoriteEvent::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
